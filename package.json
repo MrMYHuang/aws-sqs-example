@@ -1,0 +1,19 @@
+{
+  "name": "aws-sqs-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Meng-Yuan Huang",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.121.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}
