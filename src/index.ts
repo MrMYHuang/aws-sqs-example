@@ -1,9 +1,16 @@
-import { SQSClient, CreateQueueCommand, SendMessageCommand, ListQueuesCommand, GetQueueUrlCommand, ReceiveMessageCommand, DeleteMessageCommand } from "@aws-sdk/client-sqs";
+import { SQSClient, CreateQueueCommand, SendMessageCommand, GetQueueUrlCommand, ReceiveMessageCommand, DeleteMessageCommand } from "@aws-sdk/client-sqs";
+import { v4 as uuidv4 } from 'uuid';
 
 const testQueueName = 'test.fifo';
 
 const sqsClient = new SQSClient({
-    region: 'ap-east-1'
+    region: 'ap-east-1',
+    /*
+    credentials: {
+        accessKeyId: '',
+        secretAccessKey: '',
+    }
+    */
 });
 
 async function main() {
@@ -21,8 +28,7 @@ async function main() {
                     Attributes: {
                         'MessageRetentionPeriod': `${60 * 60 * 24 * 8}`,
                         'FifoQueue': 'true',
-                        'ContentBasedDeduplication': 'true',
-                    }
+                    },
                 }));
 
                 queueUrl = createRes.QueueUrl;
@@ -31,18 +37,18 @@ async function main() {
 
         const sendRes = await sqsClient.send(new SendMessageCommand({
             QueueUrl: queueUrl,
-            MessageBody: 'Hello',
+            MessageBody: JSON.stringify({hello: 'world!'}),
             MessageGroupId: '0',
+            MessageDeduplicationId: uuidv4(),
         }));
 
         const recRes = await sqsClient.send(new ReceiveMessageCommand({
             QueueUrl: queueUrl,
             MaxNumberOfMessages: 1,
-            AttributeNames: ['MessageDeduplicationId'],
         }));
 
         if (recRes.Messages) {
-            recRes.Messages && console.log(recRes.Messages[0].Body);
+            console.log(recRes.Messages[0].Body);
 
             const delRes = await sqsClient.send(new DeleteMessageCommand({
                 QueueUrl: queueUrl,
